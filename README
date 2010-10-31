@@ -1,23 +1,11 @@
 pyxmi   Copyright (c) 2004-2010 Doug Winter <doug@pigeonhold.com>
 
-pyxmi README
+This script will generate XMI files from your python source, suitable for
+importing into UML Modelling tools.  I've only tried it with MagicDraw, which
+is my tool of choice.
 
-NOTE: This is experimental software.  I've got no idea how well it'll work
-for you :)
-
-Usage: SourceParser.py [-v] [-z] [-Z] [-t tool] [-o output] input...
-       -v        verbose
-       -z        zip output (UNSUPPORTED)
-       -Z        Zope support
-       -t tool   Specify which tool to write for (default MagicDraw)
-       -o output write to filename output
-
-If no output is specified, it writes to stdout.
-Zope support provides interpretation of skins and www directories.
+This is hugely kludgy and barely past proof-of-concept stage, however I've used
+it successfully for many years.  YMMV.
 
 To use the files in magicdraw, you should use the File->Import menu option.
-
-If you are using Zope support, the files generated have both robustness and UML
-Web Extension stereotypes.  You will need to load the UML Web Extension module
-before importing.  The easiest way to do this is to create a blank web diagram.
 
