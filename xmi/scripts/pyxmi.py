@@ -3,7 +3,7 @@ import os
 import optparse
 from xmi import uml
 from xmi import model
-from xmi import parser
+from xmi import scanner
 
 usage = "%prog [options] source..."
 
@@ -23,10 +23,10 @@ def run(args):
     opts, args = op.parse_args(args)
     tool = uml.UMLTool(opts.tool)
 
-    parser.verbose = opts.verbose
-    parser.tool = tool
-    parser.extensions = opts.extensions
-    parser.templatedirs = opts.templates
+    scanner.verbose = opts.verbose
+    scanner.tool = tool
+    scanner.extensions = opts.extensions
+    scanner.templatedirs = opts.templates
 
     if opts.output:
         of = open(opts.output, 'w')
@@ -35,7 +35,7 @@ def run(args):
     mod = model.Model()
     for i in sys.argv[1:]:
         if os.path.isdir(i):
-            parser.add_directory(i, mod)
+            scanner.add_directory(i, mod)
         elif os.path.isfile(i):
-            parser.add_file(i, mod)
+            scanner.add_file(i, mod)
     tool.xml(mod, of)

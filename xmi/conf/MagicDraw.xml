@@ -11,12 +11,18 @@
 	</XMI.header>
 	<XMI.content >
 		<Model_Management.Model xmi.id='eee_1045467100313_135436_1' xmi.uuid='eee_1045467100313_135436_1' >
+	               <packagedElement xmi:type='uml:Profile' href='UML_Web_Extensions_Profile.xml#magicdraw_1048074704350_728498_0'>
+	                       <xmi:Extension extender='MagicDraw UML 16.9'>
+	                               <referenceExtension referentPath='UML Web Extensions Profile' referentType='Profile'/>
+	                       </xmi:Extension>
+	               </packagedElement>
+
 			<Foundation.Core.ModelElement.name >Data</Foundation.Core.ModelElement.name>
 			<Foundation.Core.GeneralizableElement.isRoot xmi.value='false' />
 			<Foundation.Core.GeneralizableElement.isLeaf xmi.value='false' />
 			<Foundation.Core.GeneralizableElement.isAbstract xmi.value='false' />
 			<Foundation.Core.Namespace.ownedElement >
-###                
+###
 			</Foundation.Core.Namespace.ownedElement>
 		</Model_Management.Model>
 	</XMI.content>

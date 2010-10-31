@@ -187,8 +187,8 @@ class SourceParser:
         f.close()
         try:
             ast = parser.suite(source)
-        except:
-            print >>sys.stderr, "Syntax Error in ", filename
+        except Exception, e:
+            print >>sys.stderr, "Syntax Error in ", filename, str(e)
             return
         tuples = ast.totuple()
         self.extract_classes(model, tuples)
@@ -321,9 +321,12 @@ def add_directory(directory, parent):
         directory = directory[:-1]
     p = model.Package(os.path.basename(directory))
     if os.path.basename(directory) in templatedirs:
+        if verbose:
+            print >>sys.stderr, "Scanning template directory", directory
         add_template_directory(directory, p)
     else:
-        if verbose: print >>sys.stderr, "Package", directory
+        if verbose:
+            print >>sys.stderr, "Package", directory
         for i in os.listdir(directory):
             path = os.path.join(directory, i)
             if os.path.isdir(path):
