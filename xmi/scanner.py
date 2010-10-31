@@ -1,4 +1,3 @@
-
 import string
 import types
 import os
@@ -253,6 +252,9 @@ class SourceParser:
     def extract_classes(self, parent, suite):
         for i in suite:
             if type(i) == type(()) and \
+               i[0] == symbol.file_input:
+                self.extract_classes(parent, i)
+            elif type(i) == type(()) and \
                i[0] == symbol.stmt and \
                i[1][0] == symbol.compound_stmt and \
                i[1][1][0] == symbol.classdef:
@@ -281,56 +283,71 @@ class SourceParser:
                         self.extract_functions(klass, j)
                 parent.addClass(klass)
 
-def add_file(filename, parent):
-    if filename.find('.py') == len(filename) - 3:
-        if verbose: print >>sys.stderr, "Parsing", filename
-        p = model.Package(os.path.basename(filename[:-3]))
-        SourceParser(p, filename)
-        parent.addPackage(p)
-    elif verbose:
-        print >>sys.stderr, "Skipping", filename
+def is_zope_pythonscript(filename):
+    for l in open(filename):
+        if l.startswith("##"):
+            return True
+        elif l.strip():
+            return False
+    return False
 
-def add_template_directory(directory, parent):
-    for i in os.listdir(directory):
-        path = os.path.join(directory, i)
-        if os.path.isdir(path):
-            p = model.Package(os.path.basename(i))
-            add_template_directory(path, p)
+def add_file(filename, parent):
+    basename = os.path.basename(filename)
+    if filename.endswith("__init__.py"):
+        if verbose:
+            print >>sys.stderr, "Parsing", filename
+        SourceParser(parent, filename)
+    elif basename.endswith(".py"):
+        if is_zope_pythonscript(filename):
+            if verbose:
+                print >>sys.stderr, "Parsing as PythonScript", filename
+                c = pythonscript_class(basename)
+                parent.addClass(c)
+        else:
+            if verbose:
+                print >>sys.stderr, "Parsing", filename
+            p = model.Package(basename[:-3])
+            SourceParser(p, filename)
             parent.addPackage(p)
-        elif os.path.isfile(path):
-            if i.endswith(".metadata"):
-                continue
-            c = model.UMLClass(".".join(i.split(".")[:-1]))
-            if i.endswith('.py') or i.endswith(".cpy") or i.endswith(".vpy"):
-                if 'robustness' in extensions:
-                    c.addStereotype(tool.stereotype['control'])
-            elif i.endswith('.pt') or i.endswith(".zpt") or i.endswith(".html"):
-                if 'web' in extensions:
-                    if i.endswith('_form.pt'):
-                        c.addStereotype(tool.stereotype['form'])
-                    else:
-                        c.addStereotype(tool.stereotype['server page'])
-                if 'robustness' in extensions:
-                    c.addStereotype(tool.stereotype['boundary'])
+    elif basename.endswith('.pt') or \
+         basename.endswith(".zpt") or \
+         basename.endswith(".html"):
+        c = model.UMLClass(basename)
+        if 'web' in extensions:
+            if basename.endswith('_form.pt'):
+                c.addStereotype(tool.stereotype['form'])
             else:
-                if verbose: print >>sys.stderr, "Skipping", i
-            parent.addClass(c)
+                c.addStereotype(tool.stereotype['server page'])
+        if 'robustness' in extensions:
+            c.addStereotype(tool.stereotype['boundary'])
+        parent.addClass(c)
+    elif basename.endswith('.js'):
+        c = model.UMLClass(basename)
+        if 'web' in extensions:
+            c.addStereotype(tool.stereotype['javascript'])
+        parent.addClass(c)
+    else:
+        if verbose:
+            print >>sys.stderr, "Skipping", filename
+
+def pythonscript_class(filename):
+    c = model.UMLClass(".".join(filename.split(".")[:-1]))
+    if 'web' in extensions:
+        c.addStereotype(tool.stereotype['server page'])
+    if 'robustness' in extensions:
+        c.addStereotype(tool.stereotype['control'])
+    return c
 
 def add_directory(directory, parent):
     if directory[-1:] == '/':
         directory = directory[:-1]
     p = model.Package(os.path.basename(directory))
-    if os.path.basename(directory) in templatedirs:
-        if verbose:
-            print >>sys.stderr, "Scanning template directory", directory
-        add_template_directory(directory, p)
-    else:
-        if verbose:
-            print >>sys.stderr, "Package", directory
-        for i in os.listdir(directory):
-            path = os.path.join(directory, i)
-            if os.path.isdir(path):
-                add_directory(path, p)
-            elif os.path.isfile(path):
-                add_file(path, p)
+    if verbose:
+        print >>sys.stderr, "Package", directory
+    for i in os.listdir(directory):
+        path = os.path.join(directory, i)
+        if os.path.isdir(path):
+            add_directory(path, p)
+        elif os.path.isfile(path):
+            add_file(path, p)
     parent.addPackage(p)

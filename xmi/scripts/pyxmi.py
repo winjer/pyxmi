@@ -1,3 +1,5 @@
+import wingdbstub
+
 import sys
 import os
 import optparse
@@ -11,7 +13,7 @@ def run(args):
 
     op = optparse.OptionParser(usage=usage)
     op.add_option("-v", "--verbose", action="store_true", default=False, help="enhance verbosity")
-    op.add_option("-t", "--templates", action="append", default=['www', 'skins', 'templates', 'html'], help="specify the names of directories that contain templates")
+    op.add_option("-t", "--templates", action="append", default=['www', 'skins', 'templates', 'html', 'template'], help="specify the names of directories that contain templates")
     op.add_option("-o", "--output", default=None, help="The output file to create")
     op.add_option("-e", "--extensions", action="append", default=['web', 'robustness'], help="model extensions to use")
     op.add_option("-T", "--tool", default="MagicDraw", help="The name of the tool to generate for (currently only MagicDraw is supported)")
