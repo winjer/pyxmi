@@ -16,12 +16,12 @@ class UMLTool:
     def read_config(self, tool_name):
         self.stereotype = {}
         config = ConfigParser.ConfigParser()
-        config.read(os.path.join(os.path.dirname(__file__), 'lib', tool_name + '.conf'))
+        config.read(os.path.join(os.path.dirname(__file__), 'conf', tool_name + '.conf'))
         for s in config.options('stereotypes'):
             self.stereotype[s] = config.get('stereotypes', s)
 
     def read_template(self, tool_name):
-        f = open(os.path.join(os.path.dirname(__file__), 'lib', tool_name + '.xml'))
+        f = open(os.path.join(os.path.dirname(__file__), 'conf', tool_name + '.xml'))
         text = f.read()
         f.close()
         self.prologue, self.epilogue = text.split('###')
@@ -30,8 +30,3 @@ class UMLTool:
         print >>out, self.prologue
         model.xml(out)
         print >>out, self.epilogue
-
-if __name__ == '__main__':
-    tool_name = sys.argv[1]
-    u = UMLTool(tool_name)
-    print u.stereotype

@@ -1,6 +1,5 @@
 import sys
-
-from GUID import GUID
+import uuid
 
 indent_level = 2
 
@@ -8,7 +7,7 @@ def truefalse(f):
     return f and "true" or "false"
 
 def newid():
-    return str(GUID())
+    return str(uuid.uuid4())
 
 class ModelElement:
 
@@ -159,7 +158,7 @@ class Package(ModelElement):
         print >>out, "</Model_Management.Package>"
 
 class Model:
-    
+
     def __init__(self):
         self.elements = []
         self.id = newid()
@@ -199,7 +198,7 @@ class Model:
     def xml(self, out):
         for e in self.elements:
             e.xml(out)
-        
+
 
 if __name__ == "__main__":
     m = Model()

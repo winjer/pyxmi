@@ -8,31 +8,17 @@ import symbol
 import token
 import pprint
 from types import ListType, TupleType
-from cStringIO import StringIO
+from StringIO import StringIO
 import zipfile
 import zlib
 
-import Model
-from UMLTool import UMLTool
+import model
 
 # Command Line Option Globals
 verbose = None
-zope = None
 tool = None
-extensions = ['web']
-
-
-_usage = """\
-Usage: SourceParser.py [-v] [-z] [-Z] [-t tool] [-o output] input...
-       -v        verbose
-       -z        zip output (UNSUPPORTED)
-       -Z        Zope support
-       -t tool   Specify which tool to write for (default MagicDraw)
-       -o output write to filename output
-
-If no output is specified, it writes to stdout.  
-Zope support provides interpretation of skins and www directories.
-"""
+templatedirs = []
+extensions = []
 
 PARAMETER_DEFAULT_PATTERN_NUMBER = (
     symbol.test,
@@ -208,7 +194,7 @@ class SourceParser:
         self.extract_classes(model, tuples)
 
     def extract_args(self, parameters, operator):
-        
+
         """ Passed a parameters this constructs a function signature """
 
         argname = None
@@ -240,7 +226,7 @@ class SourceParser:
                 i[1][1][0] == symbol.funcdef:
                     function_def = i[1][1]
                     funcname = function_def[2][1]
-                    op = Model.Operation(funcname)
+                    op = model.Operation(funcname)
                     # function_def[3] is the parameters
                     params = filter(lambda x: type(x) == types.TupleType and x[0] == symbol.parameters, function_def)
                     self.extract_args(params[0], op)
@@ -263,7 +249,7 @@ class SourceParser:
             if found:
                 return xml_encode(vars['docstring'])
         return ''
-    
+
     def extract_classes(self, parent, suite):
         for i in suite:
             if type(i) == type(()) and \
@@ -280,13 +266,13 @@ class SourceParser:
                 #            if si[0] == symbol.test:
                 #                superclasses.append(si[1][1][1][1][1][1][1][1][1][1][1][1][1][1][1])
                 #if 'Interface' in superclasses:
-                #    klass = Model.Interface(classname)
+                #    klass = model.Interface(classname)
                 #else:
-                #    klass = Model.UMLClass(classname)
+                #    klass = model.UMLClass(classname)
                 if classname.startswith('I') and classname[1] in string.uppercase:
-                    klass = Model.Interface(classname)
+                    klass = model.Interface(classname)
                 else:
-                    klass = Model.UMLClass(classname)
+                    klass = model.UMLClass(classname)
                 # now we want to find the suite for the class
                 # and go through the functions within it
                 for j in class_definition:
@@ -298,28 +284,29 @@ class SourceParser:
 def add_file(filename, parent):
     if filename.find('.py') == len(filename) - 3:
         if verbose: print >>sys.stderr, "Parsing", filename
-        p = Model.Package(os.path.basename(filename[:-3]))
+        p = model.Package(os.path.basename(filename[:-3]))
         SourceParser(p, filename)
         parent.addPackage(p)
-    elif verbose: 
+    elif verbose:
         print >>sys.stderr, "Skipping", filename
 
-def add_skins_directory(directory, parent):
-    if verbose: print >>sys.stderr, "Skins", directory
+def add_template_directory(directory, parent):
     for i in os.listdir(directory):
         path = os.path.join(directory, i)
         if os.path.isdir(path):
-            p = Model.Package(os.path.basename(i))
-            add_skins_directory(path, p)
+            p = model.Package(os.path.basename(i))
+            add_template_directory(path, p)
             parent.addPackage(p)
         elif os.path.isfile(path):
-            c = Model.UMLClass(i[:-3])
-            if i[-3:] == '.py':
+            if i.endswith(".metadata"):
+                continue
+            c = model.UMLClass(".".join(i.split(".")[:-1]))
+            if i.endswith('.py') or i.endswith(".cpy") or i.endswith(".vpy"):
                 if 'robustness' in extensions:
                     c.addStereotype(tool.stereotype['control'])
-            elif i[-3:] == '.pt':
+            elif i.endswith('.pt') or i.endswith(".zpt") or i.endswith(".html"):
                 if 'web' in extensions:
-                    if i[-8:] == '_form.pt':
+                    if i.endswith('_form.pt'):
                         c.addStereotype(tool.stereotype['form'])
                     else:
                         c.addStereotype(tool.stereotype['server page'])
@@ -332,9 +319,9 @@ def add_skins_directory(directory, parent):
 def add_directory(directory, parent):
     if directory[-1:] == '/':
         directory = directory[:-1]
-    p = Model.Package(os.path.basename(directory))
-    if zope and os.path.basename(directory) == 'skins':
-         add_skins_directory(directory, p)
+    p = model.Package(os.path.basename(directory))
+    if os.path.basename(directory) in templatedirs:
+        add_template_directory(directory, p)
     else:
         if verbose: print >>sys.stderr, "Package", directory
         for i in os.listdir(directory):
@@ -344,46 +331,3 @@ def add_directory(directory, parent):
             elif os.path.isfile(path):
                 add_file(path, p)
     parent.addPackage(p)
-
-if __name__ == '__main__':
-
-    import getopt
-
-    # Additional Command Line Options
-    compress = None
-    output = None
-    toolname = 'MagicDraw'
-
-    if len(sys.argv) == 1:
-        print >>sys.stderr, _usage
-        raise SystemExit
-
-    opts, args = getopt.getopt(sys.argv[1:], 'vt:zZo:')
-
-    for o, v in opts:
-        if o == '-v':
-            verbose = 1
-        elif o == '-z':
-            compress = 1
-        elif o == '-Z':
-            zope = 1
-        elif o == '-o':
-            output = v
-        elif o == '-t':
-            toolname = v
-
-    tool = UMLTool(toolname)
-    if compress:
-        raise KeyError("Unsupported")
-    else:
-        if output:
-            of = open(output, 'w')
-        else:
-            of = sys.stdout
-    model = Model.Model()
-    for i in sys.argv[1:]:
-        if os.path.isdir(i):
-            add_directory(i, model)
-        elif os.path.isfile(i):
-            add_file(i, model)
-    tool.xml(model, of)
