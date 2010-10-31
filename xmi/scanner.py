@@ -10,7 +10,7 @@ from types import ListType, TupleType
 from StringIO import StringIO
 import zipfile
 import zlib
-
+import wingdbstub
 import model
 
 # Command Line Option Globals
@@ -70,29 +70,32 @@ PARAMETER_DEFAULT_PATTERN_NAME = (
 # This pattern and the match function are swiped from the example.py distributed
 # with the python sources
 
-DOCSTRING_STMT_PATTERN = (
-    symbol.stmt,
-    (symbol.simple_stmt,
-     (symbol.small_stmt,
-      (symbol.expr_stmt,
-       (symbol.testlist,
-        (symbol.test,
-         (symbol.and_test,
-          (symbol.not_test,
-           (symbol.comparison,
-            (symbol.expr,
-             (symbol.xor_expr,
-              (symbol.and_expr,
-               (symbol.shift_expr,
-                (symbol.arith_expr,
-                 (symbol.term,
-                  (symbol.factor,
-                   (symbol.power,
-                    (symbol.atom,
-                     (token.STRING, ['docstring'])
-                     )))))))))))))))),
-     (token.NEWLINE, '')
-     ))
+#(300, (4, ''), (5, ''), (267, (268, (269, (270, (327, (304, (305, (306, (307, (308, (310, (311, (312, (313, (314, (315, (316, (317, (318, (3,
+DOCSTRING_STMT_PATTERN = (267, (268, (269, (270, (327, (304, (305, (306, (307, (308, (310, (311, (312, (313, (314, (315, (316, (317, (318, (3, ['docstring'])))))))))))))))))), (4, '')))
+
+##DOCSTRING_STMT_PATTERN = (
+##    symbol.stmt,
+##    (symbol.simple_stmt,
+##     (symbol.small_stmt,
+##      (symbol.expr_stmt,
+##       (symbol.testlist,
+##        (symbol.test,
+##         (symbol.and_test,
+##          (symbol.not_test,
+##           (symbol.comparison,
+##            (symbol.expr,
+##             (symbol.xor_expr,
+##              (symbol.and_expr,
+##               (symbol.shift_expr,
+##                (symbol.arith_expr,
+##                 (symbol.term,
+##                  (symbol.factor,
+##                   (symbol.power,
+##                    (symbol.atom,
+##                     (token.STRING, ['docstring'])
+##                     )))))))))))))))),
+##     (token.NEWLINE, '')
+##     ))
 
 def xml_encode(s):
     out = StringIO()
@@ -246,7 +249,9 @@ class SourceParser:
         if type(suite) == TupleType and len(suite)>2:
             found, vars = match(DOCSTRING_STMT_PATTERN, suite[3])
             if found:
-                return xml_encode(vars['docstring'])
+                ds = vars['docstring']
+                ds = ds.strip("'").strip('"')
+                return xml_encode(ds)
         return ''
 
     def extract_classes(self, parent, suite):
