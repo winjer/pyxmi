@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- <!DOCTYPE XMI SYSTEM "UMLX13.dtd"> -->
+
+<XMI xmi.version='1.0' >
+	<XMI.header >
+		<XMI.documentation >
+			<XMI.exporter >Unisys.JCR.2</XMI.exporter>
+			<XMI.exporterVersion >1.3.2</XMI.exporterVersion>
+		</XMI.documentation>
+		<XMI.metamodel xmi.name='UML' xmi.version='1.3' />
+	</XMI.header>
+	<XMI.content >
+		<Model_Management.Model xmi.id='eee_1045467100313_135436_1' xmi.uuid='eee_1045467100313_135436_1' >
+			<Foundation.Core.ModelElement.name >Data</Foundation.Core.ModelElement.name>
+			<Foundation.Core.GeneralizableElement.isRoot xmi.value='false' />
+			<Foundation.Core.GeneralizableElement.isLeaf xmi.value='false' />
+			<Foundation.Core.GeneralizableElement.isAbstract xmi.value='false' />
+			<Foundation.Core.Namespace.ownedElement >
+###                
+			</Foundation.Core.Namespace.ownedElement>
+		</Model_Management.Model>
+	</XMI.content>
+</XMI>
