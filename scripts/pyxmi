@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 
-import wingdbstub
 import sys
 from xmi.scripts import pyxmi
 pyxmi.run(sys.argv[1:])
